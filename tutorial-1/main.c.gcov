@@ -1,0 +1,259 @@
+        -:    0:Source:main.c
+        -:    0:Graph:main.gcno
+        -:    0:Data:main.gcda
+        -:    0:Runs:1
+        -:    1:#include <stdio.h>
+        -:    2:#include <stdlib.h>
+        -:    3:#include <math.h>
+        -:    4:#include <stdbool.h>
+        -:    5:#include <string.h>
+        -:    6:
+        -:    7:// Define a 2D point structure
+        -:    8:struct Point
+        -:    9:{
+        -:   10:    double x, y;
+        -:   11:};
+        -:   12:
+        -:   13:// Gaussian kernel function
+function gaussianKernel called 199840032 returned 100% blocks executed 100%
+199840032:   14:double gaussianKernel(double distance, double bandwidth)
+        -:   15:{
+199840032:   16:    return exp(-0.5 * pow(distance / bandwidth, 2));
+        -:   17:}
+        -:   18:
+        -:   19:// Mean Shift clustering function
+function meanShiftClustering called 1 returned 100% blocks executed 98%
+        1:   20:struct Point *meanShiftClustering(const struct Point *data, int numPoints, double bandwidth, double epsilon, int maxIterations, int *numCentroids)
+        -:   21:{
+        1:   22:    struct Point *centroids = (struct Point *)malloc(numPoints * sizeof(struct Point));
+     9997:   23:    for (int i = 0; i < numPoints; i++)
+branch  0 taken 9996
+branch  1 taken 1 (fallthrough)
+        -:   24:    {
+     9996:   25:        centroids[i] = data[i];
+        -:   26:    }
+        -:   27:
+        1:   28:    int iteration = 0;
+        -:   29:    while (1)
+        2:   30:    {
+        3:   31:        iteration++;
+        3:   32:        if (iteration > maxIterations)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        -:   33:        {
+        1:   34:            printf("Reached maximum iterations.\n");
+call    0 returned 1
+        1:   35:            break;
+        -:   36:        }
+        -:   37:
+        2:   38:        struct Point *newCentroids = (struct Point *)malloc(numPoints * sizeof(struct Point));
+        2:   39:        double *weightsSum = (double *)malloc(numPoints * sizeof(double));
+    19994:   40:        for (int i = 0; i < numPoints; i++)
+branch  0 taken 19992
+branch  1 taken 2 (fallthrough)
+        -:   41:        {
+    19992:   42:            newCentroids[i].x = 0.0;
+    19992:   43:            newCentroids[i].y = 0.0;
+    19992:   44:            weightsSum[i] = 0.0;
+        -:   45:        }
+        -:   46:
+    19994:   47:        for (int i = 0; i < numPoints; i++)
+branch  0 taken 19992
+branch  1 taken 2 (fallthrough)
+        -:   48:        {
+199860024:   49:            for (int j = 0; j < numPoints; j++)
+branch  0 taken 199840032
+branch  1 taken 19992 (fallthrough)
+        -:   50:            {
+199840032:   51:                double distance = sqrt(pow(centroids[i].x - data[j].x, 2) + pow(centroids[i].y - data[j].y, 2));
+199840032:   52:                double weight = gaussianKernel(distance, bandwidth);
+call    0 returned 199840032
+        -:   53:
+199840032:   54:                newCentroids[i].x += data[j].x * weight;
+199840032:   55:                newCentroids[i].y += data[j].y * weight;
+199840032:   56:                weightsSum[i] += weight;
+        -:   57:            }
+        -:   58:
+    19992:   59:            if (weightsSum[i] > 0)
+branch  0 taken 19992 (fallthrough)
+branch  1 taken 0
+        -:   60:            {
+    19992:   61:                newCentroids[i].x /= weightsSum[i];
+    19992:   62:                newCentroids[i].y /= weightsSum[i];
+        -:   63:            }
+        -:   64:        }
+        -:   65:
+        2:   66:        double maxShift = 0.0;
+    19994:   67:        for (int i = 0; i < numPoints; i++)
+branch  0 taken 19992
+branch  1 taken 2 (fallthrough)
+        -:   68:        {
+    19992:   69:            double shift = sqrt(pow(newCentroids[i].x - centroids[i].x, 2) + pow(newCentroids[i].y - centroids[i].y, 2));
+    19992:   70:            if (shift > maxShift)
+branch  0 taken 49 (fallthrough)
+branch  1 taken 19943
+        -:   71:            {
+       49:   72:                maxShift = shift;
+        -:   73:            }
+        -:   74:        }
+        -:   75:
+        2:   76:        free(centroids);
+        2:   77:        centroids = newCentroids;
+        -:   78:
+        2:   79:        if (maxShift < epsilon)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+        -:   80:        {
+    #####:   81:            break;
+        -:   82:        }
+        -:   83:
+        2:   84:        free(weightsSum);
+        -:   85:    }
+        -:   86:
+        1:   87:    *numCentroids = 0;
+        1:   88:    bool *isUnique = (bool *)malloc(numPoints * sizeof(bool));
+     9997:   89:    for (int i = 0; i < numPoints; i++)
+branch  0 taken 9996
+branch  1 taken 1 (fallthrough)
+        -:   90:    {
+     9996:   91:        isUnique[i] = true;
+        -:   92:    }
+        -:   93:
+     9997:   94:    for (int i = 0; i < numPoints; i++)
+branch  0 taken 9996
+branch  1 taken 1 (fallthrough)
+        -:   95:    {
+     9996:   96:        if (isUnique[i])
+branch  0 taken 30 (fallthrough)
+branch  1 taken 9966
+        -:   97:        {
+       30:   98:            (*numCentroids)++;
+   179148:   99:            for (int j = i + 1; j < numPoints; j++)
+branch  0 taken 179118
+branch  1 taken 30 (fallthrough)
+        -:  100:            {
+   179118:  101:                double distance = sqrt(pow(centroids[i].x - centroids[j].x, 2) + pow(centroids[i].y - centroids[j].y, 2));
+   179118:  102:                if (distance < epsilon)
+branch  0 taken 15346 (fallthrough)
+branch  1 taken 163772
+        -:  103:                {
+    15346:  104:                    isUnique[j] = false;
+        -:  105:                }
+        -:  106:            }
+        -:  107:        }
+        -:  108:    }
+        -:  109:
+        1:  110:    struct Point *uniqueCentroids = (struct Point *)malloc((*numCentroids) * sizeof(struct Point));
+        1:  111:    int index = 0;
+     9997:  112:    for (int i = 0; i < numPoints; i++)
+branch  0 taken 9996
+branch  1 taken 1 (fallthrough)
+        -:  113:    {
+     9996:  114:        if (isUnique[i])
+branch  0 taken 30 (fallthrough)
+branch  1 taken 9966
+        -:  115:        {
+       30:  116:            uniqueCentroids[index++] = centroids[i];
+        -:  117:        }
+        -:  118:    }
+        -:  119:
+        1:  120:    free(centroids);
+        1:  121:    free(isUnique);
+        -:  122:
+        1:  123:    return uniqueCentroids;
+        -:  124:}
+        -:  125:
+        -:  126:// Function to read data points from a file
+function readDataFromFile called 1 returned 100% blocks executed 85%
+        1:  127:struct Point *readDataFromFile(const char *filename, int *numPoints)
+        -:  128:{
+        1:  129:    struct Point *data = NULL;
+        1:  130:    int capacity = 10;
+        1:  131:    *numPoints = 0;
+        1:  132:    data = (struct Point *)malloc(capacity * sizeof(struct Point));
+        -:  133:
+        1:  134:    FILE *inputFile = fopen(filename, "r");
+call    0 returned 1
+        -:  135:
+        1:  136:    if (!inputFile)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -:  137:    {
+    #####:  138:        fprintf(stderr, "Error: Could not open file %s\n", filename);
+call    0 never executed
+    #####:  139:        exit(1);
+call    0 never executed
+        -:  140:    }
+        -:  141:
+        -:  142:    double x, y;
+     9997:  143:    while (fscanf(inputFile, "%lf %lf", &x, &y) == 2)
+call    0 returned 9997
+branch  1 taken 9996
+branch  2 taken 1 (fallthrough)
+        -:  144:    {
+     9996:  145:        if (*numPoints >= capacity)
+branch  0 taken 10 (fallthrough)
+branch  1 taken 9986
+        -:  146:        {
+       10:  147:            capacity *= 2;
+       10:  148:            data = (struct Point *)realloc(data, capacity * sizeof(struct Point));
+        -:  149:        }
+     9996:  150:        data[*numPoints].x = x;
+     9996:  151:        data[*numPoints].y = y;
+     9996:  152:        (*numPoints)++;
+        -:  153:    }
+        -:  154:
+        1:  155:    fclose(inputFile);
+call    0 returned 1
+        1:  156:    return data;
+        -:  157:}
+        -:  158:
+function main called 1 returned 100% blocks executed 100%
+        1:  159:int main()
+        -:  160:{
+        1:  161:    char filename[] = "test.txt";
+        -:  162:
+        -:  163:    // Read data points from the file
+        1:  164:    int vecSize = 0;
+        1:  165:    struct Point *dataVec = readDataFromFile(filename, &vecSize);
+call    0 returned 1
+        1:  166:    int numPoints = vecSize;
+        1:  167:    struct Point *data = (struct Point *)malloc(numPoints * sizeof(struct Point));
+     9997:  168:    for (int i = 0; i < numPoints; i++)
+branch  0 taken 9996
+branch  1 taken 1 (fallthrough)
+        -:  169:    {
+     9996:  170:        data[i] = dataVec[i];
+        -:  171:    }
+        1:  172:    free(dataVec);
+        -:  173:
+        -:  174:    // Mean Shift parameters
+        1:  175:    double bandwidth = 4;  // Bandwidth for the Gaussian kernel
+        1:  176:    double epsilon = 0.1; // Convergence threshold 1e-5
+        1:  177:    int maxIterations = 2; // Maximum number of iterations
+        -:  178:
+        -:  179:    // Perform Mean Shift clustering
+        1:  180:    int numCentroids = 0;
+        1:  181:    struct Point *centroids = meanShiftClustering(data, numPoints, bandwidth, epsilon, maxIterations, &numCentroids);
+call    0 returned 1
+        -:  182:
+        -:  183:    // Display the resulting centroids
+        1:  184:    printf("Cluster Centroids:\n");
+call    0 returned 1
+       31:  185:    for (int i = 0; i < numCentroids; i++)
+branch  0 taken 30
+branch  1 taken 1 (fallthrough)
+        -:  186:    {
+       30:  187:        printf("(%f, %f)\n", centroids[i].x, centroids[i].y);
+call    0 returned 30
+        -:  188:    }
+        -:  189:
+        1:  190:    printf("Number of Clusters: %d\n", numCentroids);
+call    0 returned 1
+        -:  191:
+        -:  192:    // Clean up
+        1:  193:    free(data);
+        1:  194:    free(centroids);
+        -:  195:
+        1:  196:    return 0;
+        -:  197:}
