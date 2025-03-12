@@ -8,7 +8,7 @@ double *matrix1 = (double *)malloc(N * N * sizeof(double));
 double *matrix2 = (double *)malloc(N * N * sizeof(double));
 double *result = (double *)malloc(N * N * sizeof(double));
 
-__global__ void add_matrices(double *d_matrix1, double *d_matrix2, double *d_result) {
+__global__ void multiply_matrices(double *d_matrix1, double *d_matrix2, double *d_result) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -77,7 +77,7 @@ int main() {
     cudaEventCreate(&end);
 
     cudaEventRecord(start);
-    add_matrices<<<blocksPerGrid, threadsPerBlock>>>(d_matrix1, d_matrix2, d_result);
+    multiply_matrices<<<blocksPerGrid, threadsPerBlock>>>(d_matrix1, d_matrix2, d_result);
     cudaEventRecord(end);
     cudaEventSynchronize(end);
 
